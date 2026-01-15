@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 
-function Clock({ title, timezone, onRemove }) {
-  const [date, setDate] = useState(new Date());
+function Clock({ title, timezone, currentTime, onRemove }) {
+  const [time, setTime] = useState('');
 
   useEffect(() => {
-    const timer = setInterval(() => setDate(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    const utc = currentTime.getTime() + currentTime.getTimezoneOffset() * 60000;
+    const localTime = new Date(utc + 3600000 * timezone);
+    setTime(localTime.toLocaleTimeString());
+  }, [currentTime, timezone]);
 
-  const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+  const utc = currentTime.getTime() + currentTime.getTimezoneOffset() * 60000;
   const local = new Date(utc + 3600000 * timezone);
 
   const hours = local.getHours();
@@ -19,8 +20,6 @@ function Clock({ title, timezone, onRemove }) {
   const minuteDeg = minutes * 6;
   const secondDeg = seconds * 6;
 
-  const timeString = local.toLocaleTimeString();
-
   return (
     <div className="clock-wrapper">
       <div className="clock-title">{title}</div>
@@ -28,19 +27,19 @@ function Clock({ title, timezone, onRemove }) {
       <div className="clock">
         <div
           className="hand hour-hand"
-          style={{ transform: `rotate(${hourDeg}deg)` }}
+          style={{ transform: `rotate(${hourDeg}deg)` }} // Исправлено
         />
         <div
           className="hand minute-hand"
-          style={{ transform: `rotate(${minuteDeg}deg)` }}
+          style={{ transform: `rotate(${minuteDeg}deg)` }} // Исправлено
         />
         <div
           className="hand second-hand"
-          style={{ transform: `rotate(${secondDeg}deg)` }}
+          style={{ transform: `rotate(${secondDeg}deg)` }} // Исправлено
         />
         <div className="center-dot" />
       </div>
-      <div className="digital-time">{timeString}</div>
+      <div className="digital-time">{time}</div>
       <button className="remove-btn" onClick={onRemove} aria-label="Remove clock">
         ×
       </button>

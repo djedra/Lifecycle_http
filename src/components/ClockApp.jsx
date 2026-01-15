@@ -1,5 +1,4 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import Clock from './Clock';
 import initialClocks from '../data/clocks.json';
 
@@ -8,6 +7,15 @@ function ClockApp() {
   const [title, setTitle] = useState('');
   const [timezone, setTimezone] = useState('');
   const [error, setError] = useState('');
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const addClock = () => {
     setError('');
@@ -94,6 +102,7 @@ function ClockApp() {
             key={clock.id}
             title={clock.title}
             timezone={clock.timezone}
+            currentTime={currentTime} // Передаем текущее время как пропс
             onRemove={() => removeClock(clock.id)}
           />
         ))}
