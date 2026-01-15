@@ -1,105 +1,50 @@
-import { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
 import Clock from './Clock';
-import initialClocks from '../data/clocks.json';
 
-function ClockApp() {
-  const [clocks, setClocks] = useState(initialClocks);
-  const [title, setTitle] = useState('');
-  const [timezone, setTimezone] = useState('');
-  const [error, setError] = useState('');
+const timezones = [
+  { name: 'New York', offset: -5 },
+  { name: 'London', offset: 0 },
+  { name: 'Tokyo', offset: 9 },
+  { name: 'Sydney', offset: 11 },
+];
 
-  const addClock = () => {
-    setError('');
-    
-    if (!title.trim()) {
-      setError('Please enter a title');
-      return;
-    }
+const ClockApp = () => {
+  const [clocks, setClocks] = useState([]);
 
-    if (!timezone || isNaN(timezone)) {
-      setError('Please enter a valid timezone number');
-      return;
-    }
-
-    const timezoneNum = parseFloat(timezone);
-    if (timezoneNum < -12 || timezoneNum > 14) {
-      setError('Timezone must be between -12 and +14');
-      return;
-    }
-
-    setClocks([...clocks, {
-      id: Date.now(),
-      title: title.trim(),
-      timezone: timezoneNum
-    }]);
-
-    setTitle('');
-    setTimezone('');
+  const addClock = (timezone) => {
+    setClocks([...clocks, timezone]);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      addClock();
-    }
+  const removeClock = (index) => {
+    setClocks(clocks.filter((_, i) => i !== index));
   };
 
-  const removeClock = (id) => {
-    setClocks(clocks.filter(clock => clock.id !== id));
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setClocks((prevClocks) => [...prevClocks]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="clock-app">
-      <h1 className="app-title">World Clocks</h1>
-      
-      <div className="form-container">
-        <div className="form">
-          <div className="form-group">
-            <label htmlFor="clock-title">Название</label>
-            <input
-              id="clock-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="e.g. New York"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="clock-timezone">Временная зона (GMT)</label>
-            <input
-              id="clock-timezone"
-              type="number"
-              value={timezone}
-              onChange={(e) => setTimezone(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="e.g. -5"
-              min="-12"
-              max="14"
-              step="0.5"
-            />
-          </div>
-          
-          <button className="add-button" onClick={addClock}>
-            Добавить
+    <div>
+      <h2>Clocks</h2>
+      <div>
+        {timezones.map((tz, index) => (
+          <button key={index} onClick={() => addClock(tz)}>
+            Add {tz.name}
           </button>
-        </div>
-        
-        {error && <div className="error-message">{error}</div>}
-      </div>
-
-      <div className="clocks-container">
-        {clocks.map(clock => (
-          <Clock
-            key={clock.id}
-            title={clock.title}
-            timezone={clock.timezone}
-            onRemove={() => removeClock(clock.id)}
-          />
         ))}
       </div>
+      {clocks.map((timezone, index) => (
+        <Clock
+          key={index}
+          timezone={timezone}
+          onRemove={() => removeClock(index)}
+        />
+      ))}
     </div>
   );
-}
+};
 
 export default ClockApp;
